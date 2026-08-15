@@ -1,0 +1,9 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+progress.json
+build/
+dist/
+release-assets/
+*.spec.bak
