@@ -5,7 +5,6 @@ from __future__ import annotations
 import math
 import random
 from dataclasses import dataclass
-from turtle import width
 
 import pygame
 
@@ -306,91 +305,25 @@ class CodeQuestApp:
     def _draw_quest_grid(self, x: int, y: int, width: int, height: int) -> None:
         cols = 2
         gap = 12
-
         card_w = (width - gap) // cols
-        card_h = 84
-
-        # Total height needed for all quest cards
-        rows = (len(QUESTS) + cols - 1) // cols
-        content_height = rows * card_h + (rows - 1) * gap
-
-        # Create scroll offset if it doesn't already exist
-        if not hasattr(self, "quest_scroll"):
-            self.quest_scroll = 0
-
-        # Mouse wheel scrolling
-        mouse_pos = pygame.mouse.get_pos()
-
-        viewport = pygame.Rect(x, y, width, height)
-
-        if viewport.collidepoint(mouse_pos):
-            for event in pygame.event.get():
-                if event.type == pygame.MOUSEWHEEL:
-                    self.quest_scroll -= event.y * 30
-
-        # Keep scrolling within limits
-        max_scroll = max(0, content_height - height)
-        self.quest_scroll = max(0, min(self.quest_scroll, max_scroll))
-
-        # Clip drawing to the quest area
-        old_clip = self.screen.get_clip()
-        self.screen.set_clip(viewport)
-
+        card_h = max(70, min(84, (height - 3 * gap) // 4))
         for index, quest in enumerate(QUESTS):
             col, row = index % cols, index // cols
-
-            rect = pygame.Rect(
-                x + col * (card_w + gap),
-                y + row * (card_h + gap) - self.quest_scroll,
-                card_w,
-                card_h
-        )
-
+            rect = pygame.Rect(x + col * (card_w + gap), y + row * (card_h + gap), card_w, card_h)
             unlocked = self.progress.is_unlocked(quest.id)
             complete = quest.id in self.progress.completed
-
             bg = (25, 43, 48) if complete else SURFACE
             border = (45, 113, 89) if complete else (49, 56, 85)
-
             if not unlocked:
                 bg, border = (18, 21, 38), (37, 41, 62)
-
-            hovered = (
-                unlocked
-                and viewport.collidepoint(mouse_pos)
-                and rect.collidepoint(mouse_pos)
-        )
-
+            hovered = unlocked and rect.collidepoint(pygame.mouse.get_pos())
             if hovered:
                 border = PURPLE
-
-            rounded_rect(
-                self.screen,
-                rect,
-                bg,
-                13,
-                border,
-                2 if hovered else 1
-        )
-
-            badge_color = GREEN if complete else (
-                PURPLE if unlocked else SURFACE_3
-        )
-
-            pygame.draw.circle(
-                self.screen,
-                badge_color,
-                (rect.x + 27, rect.centery),
-                17
-        )
-
+            rounded_rect(self.screen, rect, bg, 13, border, 2 if hovered else 1)
+            badge_color = GREEN if complete else (PURPLE if unlocked else SURFACE_3)
+            pygame.draw.circle(self.screen, badge_color, (rect.x + 27, rect.centery), 17)
             if complete:
-                self._draw_check(
-                    (rect.x + 27, rect.centery),
-                    9,
-                    (9, 40, 30),
-                    3
-            )
+                self._draw_check((rect.x + 27, rect.centery), 9, (9, 40, 30), 3)
             else:
                 draw_text(
                     self.screen,
@@ -400,8 +333,7 @@ class CodeQuestApp:
                     INK,
                     True,
                     anchor="center",
-            )
-
+                )
             draw_text(
                 self.screen,
                 quest.title,
@@ -409,27 +341,16 @@ class CodeQuestApp:
                 14,
                 INK if unlocked else FAINT,
                 True,
-        )
-
+            )
             draw_text(
                 self.screen,
                 f"{quest.concept}  •  {quest.xp} XP",
                 (rect.x + 54, rect.y + 43),
                 11,
                 GREEN if complete else MUTED if unlocked else FAINT,
-        )
-
-            if unlocked:
-                self.buttons.append(
-                    Button(
-                        rect,
-                        "",
-                        lambda q=quest: self._open_quest(q)
-                )
             )
-
-        # Restore normal drawing area
-        self.screen.set_clip(old_clip)
+            if unlocked:
+                self.buttons.append(Button(rect, "", lambda q=quest: self._open_quest(q)))
 
     def _draw_tasks(self, x: int, y: int, width: int, height: int) -> None:
         panel = pygame.Rect(x, y, width, height)
