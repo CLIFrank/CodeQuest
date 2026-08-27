@@ -131,6 +131,20 @@ QUESTS: tuple[Quest, ...] = (
         300,
         "Tricky",
     ),
+    Quest(
+            "exit_strategy",
+            2,
+            1,
+            "Exit the airlock",
+            "Functions with Parameters",
+            "There is a sudden drop in airlock pressure. Personnel must exit quickly.",
+            'Create a function exit_airlock(pressure) that prints "Exit now!" if pressure is below 50. Call it with 45.',
+            '# Define the exit function',
+            "Exit now!",
+            'The function checks if the pressure is below 50 and prints the message accordingly.',
+            320,
+            "Tricky",
+        ),
 )
 
 
